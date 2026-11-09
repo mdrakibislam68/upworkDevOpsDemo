@@ -1,0 +1,53 @@
+# .gitignore
+
+# --- Environment & secrets -----------------------------------------------
+.env
+*.env.local
+*.env.production
+*.env.development
+
+# --- Certificates & private keys -----------------------------------------
+*.pem
+*.key
+*.crt
+*.csr
+*.pfx
+*.p12
+ssl/
+certs/
+
+# --- Docker generated artifacts ------------------------------------------
+# (Leave image layers and volumes to Docker; don't track them in Git.)
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.tox/
+htmlcov/
+.coverage
+
+# --- OS & editor files -------------------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.iml
+
+# --- Logs & temp files -------------------------------------------------------
+*.log
+logs/
+tmp/
+
+# --- Node (if ever added) ----------------------------------------------------
+node_modules/
+

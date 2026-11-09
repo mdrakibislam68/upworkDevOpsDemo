@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Docker + Nginx Deployment Demo</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <div class="brand">
+        <span class="logo">&#9671;</span>
+        <span class="brand-name">DevOps Portfolio</span>
+      </div>
+      <nav class="nav">
+        <a href="#architecture">Architecture</a>
+        <a href="#stack">Stack</a>
+        <a href="#about">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <h1>Dockerized Web Application<br>with Nginx Reverse Proxy</h1>
+        <p class="subtitle">
+          A production-pattern deployment demonstrating Docker, Docker Compose,
+          and Nginx—built as a freelance DevOps portfolio project.
+        </p>
+        <div class="status-badge" id="status-badge">
+          <span class="status-dot"></span>
+          <span class="status-text">Application Running</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deployment Info -->
+    <section class="info-cards">
+      <div class="container grid-3">
+        <div class="card">
+          <div class="card-icon">&#128230;</div>
+          <h3>Reverse Proxy</h3>
+          <p>
+            All traffic enters through <strong>Nginx</strong>, which forwards
+            requests to the app container over an isolated Docker network.
+            The application port is never exposed to the host.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#128274;</div>
+          <h3>Network Isolation</h3>
+          <p>
+            Containers communicate on a dedicated <strong>internal bridge
+            network</strong>. Only the Nginx HTTP port is published to the host,
+            reducing the attack surface.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-icon">&#9881;</div>
+          <h3>Health Checks</h3>
+          <p>
+            Docker health checks monitor both the application and the proxy.
+            Compose restart policies keep services running after transient
+            failures.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture" class="section">
+      <div class="container">
+        <h2>Architecture</h2>
+        <p class="section-desc">
+          Requests flow from the browser to the Nginx reverse proxy container,
+          then across the internal Docker network to the application container.
+          The app never speaks directly to the outside world.
+        </p>
+        <div class="arch-diagram">
+          <div class="arch-step">
+            <div class="arch-box browser">Browser</div>
+          </div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-step">
+            <div class="arch-box host">Host&nbsp;:8080<br><span class="arch-label">published port</span></div>
+          </div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-step">
+            <div class="arch-box nginx">Nginx Container<br><span class="arch-label">:80 → proxy_pass</span></div>
+          </div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-step">
+            <div class="arch-box network">Internal Docker Network<br><span class="arch-label">app-net bridge</span></div>
+          </div>
+          <div class="arch-arrow">&#8595;</div>
+          <div class="arch-step">
+            <div class="arch-box app">Web App Container<br><span class="arch-label">:3000 (not exposed)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stack -->
+    <section id="stack" class="section alt-bg">
+      <div class="container">
+        <h2>Technology Stack</h2>
+        <div class="grid-4">
+          <div class="tech-item">
+            <div class="tech-badge docker">Docker</div>
+            <p>Container runtime and image management</p>
+          </div>
+          <div class="tech-item">
+            <div class="tech-badge compose">Compose</div>
+            <p>Multi-container orchestration and networking</p>
+          </div>
+          <div class="tech-item">
+            <div class="tech-badge nginx">Nginx</div>
+            <p>High-performance reverse proxy and web server</p>
+          </div>
+          <div class="tech-item">
+            <div class="tech-badge linux">Linux</div>
+            <p>Ubuntu-based container images and shell scripting</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="about" class="section">
+      <div class="container two-col">
+        <div>
+          <h2>About This Project</h2>
+          <p>
+            This project demonstrates the patterns used daily by DevOps
+            engineers when deploying web applications for small to medium
+            businesses:
+          </p>
+          <ul class="feature-list">
+            <li>Separating application code from infrastructure configuration</li>
+            <li>Using Nginx as an entry-point to hide internal service topology</li>
+            <li>Environment-variable-driven configuration without hardcoded secrets</li>
+            <li>Automated validation and deployment scripts</li>
+            <li>Container health monitoring and restart policies</li>
+          </ul>
+        </div>
+        <div class="build-info">
+          <h3>Build Information</h3>
+          <table class="info-table">
+            <tr><td>Project</td><td>docker-nginx-deployment</td></tr>
+            <tr><td>Version</td><td>1.0.0</td></tr>
+            <tr><td>App Server</td><td>Nginx (app) + Nginx (proxy)</td></tr>
+            <tr><td>Transport</td><td>HTTP (HTTPS as future enhancement)</td></tr>
+            <tr><td>License</td><td>MIT</td></tr>
+          </table>
+          <p class="disclaimer">
+            &#9432; This is a portfolio demonstration. The status indicator above
+            confirms the app container is reachable—it does not monitor external
+            dependencies.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>
+        Built by <strong>Rakib</strong> &middot; DevOps Portfolio &middot;
+        <a href="https://github.com" rel="noopener">GitHub</a>
+      </p>
+      <p class="footer-note">
+        Served through Nginx reverse proxy &middot; Docker Compose deployment
+      </p>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js"></script>
+</body>
+</html>
+

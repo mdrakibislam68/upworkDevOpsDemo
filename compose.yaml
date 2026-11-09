@@ -1,0 +1,102 @@
+# compose.yaml — Docker Compose configuration
+#
+# Manages two containers:
+#   nginx   — public-facing reverse proxy (only container with a published port)
+#   webapp  — application container (internal only, unreachable from the host)
+#
+# No "version" field: the current Compose specification does not require it.
+# Using it with modern versions produces a deprecation warning.
+
+# ---------------------------------------------------------------------------
+# Shared extension fields (YAML anchors) — reused across services.
+# ---------------------------------------------------------------------------
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+# ---------------------------------------------------------------------------
+# Services
+# ---------------------------------------------------------------------------
+services:
+
+  # --------------------------------------------------------------------------
+  # nginx — Reverse proxy
+  # --------------------------------------------------------------------------
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    image: demo-nginx-proxy:1.0.0
+    container_name: demo-nginx-proxy
+    ports:
+      # Only this container publishes a port to the host.
+      # NGINX_PORT defaults to 8080 (set in .env or .env.example).
+      - "${NGINX_PORT:-8080}:80"
+    networks:
+      - app-net
+    depends_on:
+      webapp:
+        condition: service_healthy   # Wait until the app passes its health check.
+    restart: unless-stopped
+    logging: *default-logging
+    # Health check for the proxy itself — hits /healthz which Nginx serves
+    # directly without contacting the upstream.
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 15s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    # Drop all Linux capabilities except those Nginx needs to bind to port 80
+    # and serve HTTP. No privileged mode, no host networking.
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+
+  # --------------------------------------------------------------------------
+  # webapp — Application container (internal only)
+  # --------------------------------------------------------------------------
+  webapp:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    image: demo-webapp:1.0.0
+    container_name: demo-webapp
+    # NOTE: No "ports" key. This container is intentionally unreachable from
+    # the host. It can only be accessed via the nginx service over app-net.
+    networks:
+      - app-net
+    restart: unless-stopped
+    logging: *default-logging
+    environment:
+      # APP_ENV is not currently consumed by the static app, but is included
+      # as a pattern showing how environment variables would be passed.
+      APP_ENV: "${APP_ENV:-production}"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/"]
+      interval: 15s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+
+# ---------------------------------------------------------------------------
+# Networks
+# ---------------------------------------------------------------------------
+networks:
+  app-net:
+    # A dedicated bridge network isolates project traffic.
+    # Containers refer to each other by service name (Compose DNS).
+    driver: bridge
+    name: demo-app-net
